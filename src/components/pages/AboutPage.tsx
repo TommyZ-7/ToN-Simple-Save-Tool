@@ -1,19 +1,17 @@
 import { motion } from "framer-motion";
-import { Info, Heart, Save, Clipboard, Eye, Clock, RefreshCw } from "lucide-react";
-import { SectionHeader, Card, Button } from "../common";
+import { Info, Heart, Save, Clipboard, Eye, Clock } from "lucide-react";
+import { SectionHeader, Card } from "../common";
 import type { LucideIcon } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { useEffect, useState } from "react";
 
-interface AboutPageProps {
-  onCheckForUpdates?: () => void;
-}
-
-export function AboutPage({ onCheckForUpdates }: AboutPageProps) {
+export function AboutPage() {
   const [version, setVersion] = useState<string>("");
 
   useEffect(() => {
-    getVersion().then(setVersion).catch(() => setVersion("不明"));
+    getVersion()
+      .then(setVersion)
+      .catch(() => setVersion("不明"));
   }, []);
   return (
     <div className="space-y-6">
@@ -36,22 +34,14 @@ export function AboutPage({ onCheckForUpdates }: AboutPageProps) {
               自動監視・管理するツールです。
             </p>
             <p className="text-sm text-gray-500 mb-4">バージョン: v{version}</p>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://vrchat.com/home/world/wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd/info"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#0078d4] hover:text-[#1a86d9] text-sm font-medium"
-              >
-                ワールドページを開く →
-              </a>
-              {onCheckForUpdates && (
-                <Button variant="ghost" size="sm" onClick={onCheckForUpdates}>
-                  <RefreshCw className="w-4 h-4" />
-                  アップデートを確認
-                </Button>
-              )}
-            </div>
+            <a
+              href="https://vrchat.com/home/world/wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd/info"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#0078d4] hover:text-[#1a86d9] text-sm font-medium"
+            >
+              ワールドページを開く →
+            </a>
           </div>
         </div>
       </Card>

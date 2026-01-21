@@ -11,7 +11,7 @@ import {
   SettingsPage,
   AboutPage,
 } from "./components/pages";
-import { UpdateBanner, UpdateModal } from "./components/common";
+import { UpdateBanner } from "./components/common";
 import { useUpdater } from "./hooks";
 
 type CodeEntry = {
@@ -53,7 +53,6 @@ function App() {
     survivals: 0,
   });
   const [autoStartEnabled, setAutoStartEnabled] = useState(false);
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
   // アップデート機能
   const {
@@ -77,7 +76,7 @@ function App() {
         setSnapshot(event.payload as AppSnapshot);
       });
       unlistenSettings = await listen("open_settings", () => {
-        setCurrentPage("settings");
+        setCurrentPage("home");
       });
     };
 
@@ -121,22 +120,8 @@ function App() {
     }
   };
 
-  const handleOpenUpdateModal = () => {
-    setUpdateModalOpen(true);
-    if (updateStatus === "idle" || updateStatus === "up-to-date") {
-      checkForUpdates();
-    }
-  };
-
-  const handleCloseUpdateModal = () => {
-    setUpdateModalOpen(false);
-    if (updateStatus === "up-to-date" || updateStatus === "error") {
-      dismissUpdate();
-    }
-  };
-
-  const handleUpdateFromBanner = () => {
-    setUpdateModalOpen(true);
+  const handleGoToSettings = () => {
+    setCurrentPage("settings");
   };
 
   const renderPage = () => {
@@ -159,10 +144,16 @@ function App() {
             onToggleAutoStart={toggleAutoStart}
             onChooseLogDir={handleChooseLogDir}
             onResetLogDir={handleResetLogDir}
+            updateStatus={updateStatus}
+            updateInfo={updateInfo}
+            updateProgress={updateProgress}
+            updateError={updateError}
+            onCheckForUpdates={checkForUpdates}
+            onDownloadAndInstall={downloadAndInstall}
           />
         );
       case "about":
-        return <AboutPage onCheckForUpdates={handleOpenUpdateModal} />;
+        return <AboutPage />;
       default:
         return null;
     }
@@ -178,22 +169,10 @@ function App() {
 
       {/* アップデート通知バナー */}
       <UpdateBanner
-        isVisible={updateStatus === "available" && !updateModalOpen}
+        isVisible={updateStatus === "available" && currentPage !== "settings"}
         updateInfo={updateInfo}
-        onUpdate={handleUpdateFromBanner}
+        onUpdate={handleGoToSettings}
         onDismiss={dismissUpdate}
-      />
-
-      {/* アップデートモーダル */}
-      <UpdateModal
-        isOpen={updateModalOpen}
-        onClose={handleCloseUpdateModal}
-        status={updateStatus}
-        updateInfo={updateInfo}
-        progress={updateProgress}
-        error={updateError}
-        onCheckForUpdates={checkForUpdates}
-        onDownloadAndInstall={downloadAndInstall}
       />
     </div>
   );

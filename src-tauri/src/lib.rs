@@ -408,6 +408,7 @@ pub fn run() {
             let tray_menu = tauri::menu::Menu::with_items(app, &[&show_item, &quit_item])?;
 
             tauri::tray::TrayIconBuilder::new()
+                .icon(app.default_window_icon().cloned().expect("failed to get default window icon"))
                 .menu(&tray_menu)
                 .on_menu_event(|app, event| match event.id().as_ref() {
                     "show" => {

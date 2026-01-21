@@ -1,8 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, RefreshCw, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
+import {
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  X,
+} from "lucide-react";
 import { createPortal } from "react-dom";
 import { Button, Spinner } from "./FormElements";
-import type { UpdateStatus, UpdateInfo, UpdateProgress } from "../../hooks/useUpdater";
+import type {
+  UpdateStatus,
+  UpdateInfo,
+  UpdateProgress,
+} from "../../hooks/useUpdater";
 
 interface UpdateModalProps {
   isOpen: boolean;
@@ -41,7 +52,11 @@ export function UpdateModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={status !== "downloading" && status !== "installing" ? onClose : undefined}
+            onClick={
+              status !== "downloading" && status !== "installing"
+                ? onClose
+                : undefined
+            }
           />
 
           {/* Modal Content */}
@@ -69,9 +84,7 @@ export function UpdateModal({
             </div>
 
             {/* Body */}
-            <div className="p-6">
-              {renderContent()}
-            </div>
+            <div className="p-6">{renderContent()}</div>
           </motion.div>
         </motion.div>
       )}
@@ -92,7 +105,11 @@ export function UpdateModal({
                 新しいバージョンが利用可能か確認します
               </p>
             </div>
-            <Button variant="primary" onClick={onCheckForUpdates} className="w-full">
+            <Button
+              variant="primary"
+              onClick={onCheckForUpdates}
+              className="w-full"
+            >
               <RefreshCw className="w-4 h-4" />
               アップデートを確認
             </Button>
@@ -140,7 +157,9 @@ export function UpdateModal({
                 <Download className="w-6 h-6 text-[#0078d4]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium">新しいバージョンが利用可能です</p>
+                <p className="text-white font-medium">
+                  新しいバージョンが利用可能です
+                </p>
                 <p className="text-sm text-gray-400 mt-1">
                   v{updateInfo?.currentVersion} → v{updateInfo?.version}
                 </p>
@@ -149,7 +168,9 @@ export function UpdateModal({
 
             {updateInfo?.body && (
               <div className="bg-white/5 rounded-lg p-4 max-h-40 overflow-y-auto">
-                <h4 className="text-sm font-medium text-white mb-2">変更内容</h4>
+                <h4 className="text-sm font-medium text-white mb-2">
+                  変更内容
+                </h4>
                 <p className="text-sm text-gray-400 whitespace-pre-wrap">
                   {updateInfo.body}
                 </p>
@@ -160,7 +181,11 @@ export function UpdateModal({
               <Button variant="secondary" onClick={onClose} className="flex-1">
                 後で
               </Button>
-              <Button variant="primary" onClick={onDownloadAndInstall} className="flex-1">
+              <Button
+                variant="primary"
+                onClick={onDownloadAndInstall}
+                className="flex-1"
+              >
                 <Download className="w-4 h-4" />
                 アップデート
               </Button>
@@ -177,7 +202,8 @@ export function UpdateModal({
               </div>
               <p className="text-white font-medium">ダウンロード中...</p>
               <p className="text-sm text-gray-400 mt-1">
-                {formatBytes(progress?.downloaded || 0)} / {formatBytes(progress?.total || 0)}
+                {formatBytes(progress?.downloaded || 0)} /{" "}
+                {formatBytes(progress?.total || 0)}
               </p>
             </div>
 
@@ -226,7 +252,11 @@ export function UpdateModal({
               <Button variant="secondary" onClick={onClose} className="flex-1">
                 閉じる
               </Button>
-              <Button variant="primary" onClick={onCheckForUpdates} className="flex-1">
+              <Button
+                variant="primary"
+                onClick={onCheckForUpdates}
+                className="flex-1"
+              >
                 再試行
               </Button>
             </div>
