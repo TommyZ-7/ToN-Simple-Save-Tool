@@ -215,10 +215,10 @@ fn process_log_line(
             let round_type_str = round_type.as_str().trim().to_string();
             // 前のラウンドが未決着（リスポーンなど）の場合はログ出力
             if let Some(prev_round) = &state.current_round_type {
-                println!("[TSAS] 前のラウンド({})が未決着のまま次のラウンドへ", prev_round);
+                println!("[tsst] 前のラウンド({})が未決着のまま次のラウンドへ", prev_round);
             }
             state.current_round_type = Some(round_type_str.clone());
-            println!("[TSAS] ラウンド開始: {}", round_type_str);
+            println!("[tsst] ラウンド開始: {}", round_type_str);
             // ラウンドタイプのエントリを作成（まだ存在しない場合）
             state.data.stats.round_types.entry(round_type_str).or_default();
         }
@@ -231,7 +231,7 @@ fn process_log_line(
         // ラウンドタイプ別の統計を更新
         let round_stats = state.data.stats.round_types.entry(round_type.clone()).or_default();
         round_stats.deaths += 1;
-        println!("[TSAS] 死亡検出: {} (生存: {}, 死亡: {})", round_type, state.data.stats.survivals, state.data.stats.deaths);
+        println!("[tsst] 死亡検出: {} (生存: {}, 死亡: {})", round_type, state.data.stats.survivals, state.data.stats.deaths);
         changed = true;
     }
 
@@ -242,7 +242,7 @@ fn process_log_line(
         // ラウンドタイプ別の統計を更新
         let round_stats = state.data.stats.round_types.entry(round_type.clone()).or_default();
         round_stats.survivals += 1;
-        println!("[TSAS] 生存検出: {} (生存: {}, 死亡: {})", round_type, state.data.stats.survivals, state.data.stats.deaths);
+        println!("[tsst] 生存検出: {} (生存: {}, 死亡: {})", round_type, state.data.stats.survivals, state.data.stats.deaths);
         changed = true;
     }
 
@@ -260,7 +260,7 @@ fn process_log_line(
             
             let code = code_match.as_str().to_string();
             let round_type = state.current_round_type.clone();
-            println!("[TSAS] 新規コード発見: {} (ラウンド: {:?})", code, round_type);
+            println!("[tsst] 新規コード発見: {} (ラウンド: {:?})", code, round_type);
             
             state.data.history.push(CodeEntry {
                 code,
@@ -290,7 +290,7 @@ fn maybe_copy_latest_code(line: &str, state: &mut AppState) {
         }
         if let Ok(mut clipboard) = Clipboard::new() {
             let _ = clipboard.set_text(code.clone());
-            println!("[TSAS] クリップボードにコピー: {}", code);
+            println!("[tsst] クリップボードにコピー: {}", code);
             state.last_copied_code = Some(code);
         }
     }
