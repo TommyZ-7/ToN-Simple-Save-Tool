@@ -28,7 +28,7 @@ export function TitleBar() {
           className="text-xs font-medium text-gray-400"
           data-tauri-drag-region
         >
-          ToN Simple Auto Saver
+          ToN Simple Save Tool
         </span>
       </div>
 

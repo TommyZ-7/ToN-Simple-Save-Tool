@@ -44,7 +44,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             exit={{ opacity: 0 }}
             className="ml-2 text-sm font-semibold text-white"
           >
-            ToN Simple Auto Saver
+            ToN Simple Save Tool
           </motion.span>
         )}
       </div>

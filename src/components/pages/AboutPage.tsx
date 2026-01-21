@@ -17,7 +17,7 @@ export function AboutPage() {
     <div className="space-y-6">
       <SectionHeader
         title="このアプリについて"
-        description="ToN Simple Auto Saver の情報"
+        description="ToN Simple Save Tool の情報"
       />
 
       <Card hover={false} className="p-6">
@@ -27,7 +27,7 @@ export function AboutPage() {
           </div>
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-white mb-2">
-              ToN Simple Auto Saver
+              ToN Simple Save Tool
             </h2>
             <p className="text-gray-400 mb-2">
               VRChatのゲームワールド「Terrors of Nowhere」のセーブコードを

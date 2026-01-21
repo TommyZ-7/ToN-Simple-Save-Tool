@@ -1,6 +1,6 @@
-![ToN Simple Auto Saver](unnamed.jpg)
+![ToN Simple Save Tool](unnamed.jpg)
 
-# ToN Simple Auto Saver
+# ToN Simple Save Tool
 
 VRChat の **Terrors of Nowhere (ToN)** 用セーブコード自動保存ツール。
 
@@ -16,7 +16,7 @@ VRChat の **Terrors of Nowhere (ToN)** 用セーブコード自動保存ツー�
 
 ## インストール
 
-[Releases](https://github.com/TommyZ-7/ToN-Simple-Auto-Saver/releases) から最新版をダウンロードしてください。
+[Releases](https://github.com/TommyZ-7/ToN-Simple-Save-Tool/releases) から最新版をダウンロードしてください。
 
 ## 開発
 
