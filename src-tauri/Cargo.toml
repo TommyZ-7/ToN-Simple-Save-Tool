@@ -1,6 +1,6 @@
 [package]
 name = "tsst"
-version = "0.1.3"
+version = "0.1.4"
 description = "ToN Simple Save Tool"
 authors = ["you"]
 edition = "2021"
