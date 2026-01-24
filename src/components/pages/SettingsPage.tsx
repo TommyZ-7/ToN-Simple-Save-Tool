@@ -10,6 +10,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronDown,
+  Radio,
 } from "lucide-react";
 import type {
   UpdateStatus,
@@ -21,8 +22,10 @@ const DEFAULT_LOG_DIR = "%LOCALAPPDATA%Low\\VRChat\\VRChat";
 
 interface SettingsPageProps {
   autoStartEnabled: boolean;
+  autoSwitchTabEnabled: boolean;
   logDir: string | null | undefined;
   onToggleAutoStart: () => void;
+  onToggleAutoSwitchTab: () => void;
   onChooseLogDir: () => void;
   onResetLogDir: () => void;
   // アップデート関連
@@ -37,8 +40,10 @@ interface SettingsPageProps {
 
 export function SettingsPage({
   autoStartEnabled,
+  autoSwitchTabEnabled,
   logDir,
   onToggleAutoStart,
+  onToggleAutoSwitchTab,
   onChooseLogDir,
   onResetLogDir,
   updateStatus,
@@ -62,6 +67,14 @@ export function SettingsPage({
           description="Windows起動時に自動的にバックグラウンドで起動"
         >
           <Toggle checked={autoStartEnabled} onChange={onToggleAutoStart} />
+        </SettingItem>
+
+        <SettingItem
+          icon={<Radio className="w-5 h-5" />}
+          title="ラウンド中の自動タブ切替"
+          description="ラウンド開始時にリアルタイムタブへ自動移動"
+        >
+          <Toggle checked={autoSwitchTabEnabled} onChange={onToggleAutoSwitchTab} />
         </SettingItem>
 
         <div className="p-4">
@@ -206,11 +219,11 @@ function UpdateSection({
           {(status === "idle" ||
             status === "up-to-date" ||
             status === "error") && (
-            <Button variant="secondary" onClick={onCheckForUpdates}>
-              <RefreshCw className="w-4 h-4" />
-              確認
-            </Button>
-          )}
+              <Button variant="secondary" onClick={onCheckForUpdates}>
+                <RefreshCw className="w-4 h-4" />
+                確認
+              </Button>
+            )}
           {status === "checking" && (
             <Button variant="secondary" disabled>
               <Spinner size="sm" />

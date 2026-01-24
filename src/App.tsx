@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -10,6 +10,7 @@ import {
   HistoryPage,
   SettingsPage,
   AboutPage,
+  RealtimePage,
 } from "./components/pages";
 import { UpdateBanner } from "./components/common";
 import { useUpdater } from "./hooks";
@@ -31,8 +32,18 @@ type RoundStats = {
   round_types: Record<string, RoundTypeStats>;
 };
 
+type CurrentRoundInfo = {
+  is_active: boolean;
+  map_name?: string | null;
+  round_type?: string | null;
+  killers: number[];
+  is_dead: boolean;
+  save_code?: string | null;
+};
+
 type AppSettings = {
   log_dir?: string | null;
+  auto_switch_tab?: boolean;
 };
 
 type AppSnapshot = {
@@ -41,6 +52,7 @@ type AppSnapshot = {
   latest_code?: CodeEntry | null;
   stats: RoundStats;
   survivals: number;
+  current_round: CurrentRoundInfo;
 };
 
 function App() {
@@ -51,8 +63,14 @@ function App() {
     latest_code: null,
     stats: { total_rounds: 0, deaths: 0, round_types: {} },
     survivals: 0,
+    current_round: {
+      is_active: false,
+      killers: [],
+      is_dead: false,
+    },
   });
   const [autoStartEnabled, setAutoStartEnabled] = useState(false);
+  const previousPageRef = useRef<string>("home");
 
   // アップデート機能
   const {
@@ -69,6 +87,8 @@ function App() {
   useEffect(() => {
     let unlistenState: (() => void) | undefined;
     let unlistenSettings: (() => void) | undefined;
+    let unlistenRoundStarted: (() => void) | undefined;
+    let unlistenRoundEnded: (() => void) | undefined;
 
     const init = async () => {
       await refreshState();
@@ -79,6 +99,19 @@ function App() {
       unlistenSettings = await listen("open_settings", () => {
         setCurrentPage("home");
       });
+      // ラウンド開始イベント：リアルタイムタブへ自動切替
+      unlistenRoundStarted = await listen("round_started", () => {
+        setCurrentPage((prev) => {
+          if (prev !== "realtime") {
+            previousPageRef.current = prev;
+          }
+          return "realtime";
+        });
+      });
+      // ラウンド終了イベント：元のタブへ戻る
+      unlistenRoundEnded = await listen("round_ended", () => {
+        setCurrentPage(previousPageRef.current);
+      });
     };
 
     init();
@@ -86,6 +119,8 @@ function App() {
     return () => {
       unlistenState?.();
       unlistenSettings?.();
+      unlistenRoundStarted?.();
+      unlistenRoundEnded?.();
     };
   }, []);
 
@@ -121,6 +156,14 @@ function App() {
     }
   };
 
+  const toggleAutoSwitchTab = async () => {
+    const newValue = !snapshot.settings.auto_switch_tab;
+    const data = (await invoke("set_auto_switch_tab", {
+      enabled: newValue,
+    })) as AppSettings;
+    setSnapshot((prev) => ({ ...prev, settings: data }));
+  };
+
   const handleGoToSettings = () => {
     setCurrentPage("settings");
   };
@@ -135,14 +178,18 @@ function App() {
             survivals={snapshot.survivals}
           />
         );
+      case "realtime":
+        return <RealtimePage currentRound={snapshot.current_round} />;
       case "history":
         return <HistoryPage history={snapshot.history} />;
       case "settings":
         return (
           <SettingsPage
             autoStartEnabled={autoStartEnabled}
+            autoSwitchTabEnabled={snapshot.settings.auto_switch_tab ?? false}
             logDir={snapshot.settings.log_dir}
             onToggleAutoStart={toggleAutoStart}
+            onToggleAutoSwitchTab={toggleAutoSwitchTab}
             onChooseLogDir={handleChooseLogDir}
             onResetLogDir={handleResetLogDir}
             updateStatus={updateStatus}

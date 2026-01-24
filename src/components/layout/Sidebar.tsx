@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Home, History, Settings, Info, ChevronLeft, Menu } from "lucide-react";
+import { Home, History, Settings, Info, ChevronLeft, Menu, Radio } from "lucide-react";
 import { useState } from "react";
 
 interface SidebarProps {
@@ -9,6 +9,7 @@ interface SidebarProps {
 
 const navItems = [
   { id: "home", label: "ホーム", icon: Home },
+  { id: "realtime", label: "リアルタイム", icon: Radio },
   { id: "history", label: "コード履歴", icon: History },
   { id: "settings", label: "設定", icon: Settings },
   { id: "about", label: "このアプリについて", icon: Info },
@@ -59,11 +60,10 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => onPageChange(item.id)}
-              className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${
-                isActive
-                  ? "bg-white/10 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              }`}
+              className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${isActive
+                ? "bg-white/10 text-white"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
             >
               <Icon className="w-5 h-5 shrink-0" />
               {!isCollapsed && (
