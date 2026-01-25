@@ -1,6 +1,6 @@
 [package]
 name = "tsst"
-version = "0.1.6"
+version = "0.1.7"
 description = "ToN Simple Save Tool"
 authors = ["you"]
 edition = "2021"
@@ -29,7 +29,6 @@ serde_json = "1"
 regex = "1"
 arboard = "3"
 lazy_static = "1.4"
-obfstr = "0.4"
 
 [profile.release]
 opt-level = 3

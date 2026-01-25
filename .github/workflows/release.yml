@@ -52,6 +52,11 @@ jobs:
           cd src-dotnet/VROverlayApp
           dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
           Copy-Item "bin/Release/net8.0/win-x64/publish/VROverlayApp.exe" "../../src-tauri/binaries/vr-overlay-x86_64-pc-windows-msvc.exe" -Force
+          # Ensure openvr_api.dll exists in binaries directory
+          if (-not (Test-Path "../../src-tauri/binaries/openvr_api.dll")) {
+            Write-Error "openvr_api.dll not found in src-tauri/binaries/"
+            exit 1
+          }
         shell: pwsh
 
       - name: Install frontend dependencies
