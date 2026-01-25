@@ -73,8 +73,7 @@ namespace VROverlayApp
         {
             Console.WriteLine("[VROverlay] Starting...");
 
-            Console.InputEncoding = Encoding.UTF8;
-            Console.OutputEncoding = Encoding.UTF8;
+            TrySetConsoleEncoding();
 
             // Parse command line arguments
             for (int i = 0; i < args.Length; i++)
@@ -241,6 +240,20 @@ namespace VROverlayApp
             {
                 Console.WriteLine($"[VROverlay] Error in ProcessCommand: {ex.Message}");
                 Console.WriteLine($"[VROverlay] Stack: {ex.StackTrace}");
+            }
+        }
+
+        static void TrySetConsoleEncoding()
+        {
+            try
+            {
+                Console.InputEncoding = Encoding.UTF8;
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+            catch
+            {
+                // Some environments (e.g., GUI subsystem or CI-built binaries) do not allow
+                // setting console encodings. Ignore to keep the overlay running.
             }
         }
 

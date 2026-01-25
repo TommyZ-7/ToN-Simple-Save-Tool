@@ -471,7 +471,15 @@ fn start_vr_overlay(
     // sidecarと同じディレクトリをカレントディレクトリに設定（DLLを見つけるため）
     let working_dir = binary_path.parent().unwrap_or(Path::new("."));
     
-    let mut child = Command::new(&binary_path)
+    let mut command = Command::new(&binary_path);
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    let mut child = command
         .current_dir(working_dir)
         .arg("--position")
         .arg(position_arg)
