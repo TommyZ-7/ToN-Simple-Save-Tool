@@ -14,6 +14,8 @@ interface CodeEntry {
   code: string;
   timestamp: string;
   round_type?: string | null;
+  terror_names?: string[] | null;
+  round_type_english?: string | null;
 }
 
 interface RoundTypeStats {
@@ -98,13 +100,32 @@ export function HomePage({ latestCode, stats, survivals }: HomePageProps) {
           <div className="flex-1 min-w-0">
             <div className="text-xs text-gray-500 mb-1">最新のセーブコード</div>
             {latestCode ? (
-              <div className="flex items-center gap-3">
-                <div className="text-sm text-gray-400">
-                  {latestCode.timestamp}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <div className="text-sm text-gray-400">
+                    {latestCode.timestamp}
+                  </div>
+                  {latestCode.round_type_english && (
+                    <div className="px-2 py-0.5 rounded bg-[#0078d4]/20 text-xs text-[#0078d4]">
+                      {latestCode.round_type_english}
+                    </div>
+                  )}
+                  {latestCode.round_type && !latestCode.round_type_english && (
+                    <div className="px-2 py-0.5 rounded bg-white/10 text-xs text-gray-400">
+                      {latestCode.round_type} 生存
+                    </div>
+                  )}
                 </div>
-                {latestCode.round_type && (
-                  <div className="px-2 py-0.5 rounded bg-white/10 text-xs text-gray-400">
-                    {latestCode.round_type} 生存
+                {latestCode.terror_names && latestCode.terror_names.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {latestCode.terror_names.map((name, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded bg-red-500/20 text-xs text-red-400"
+                      >
+                        {name}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>

@@ -7,6 +7,8 @@ interface CodeEntry {
   code: string;
   timestamp: string;
   round_type?: string | null;
+  terror_names?: string[] | null;
+  round_type_english?: string | null;
 }
 
 interface HistoryPageProps {
@@ -42,11 +44,30 @@ export function HistoryPage({ history }: HistoryPageProps) {
                 <div className="w-8 h-8 rounded-full bg-[#0078d4]/20 flex items-center justify-center text-[#0078d4] text-sm font-medium">
                   {index + 1}
                 </div>
-                <div className="flex flex-col">
-                  <div className="text-sm text-gray-400">{entry.timestamp}</div>
-                  {entry.round_type && (
-                    <div className="text-xs text-gray-500">
-                      {entry.round_type} 生存
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm text-gray-400">{entry.timestamp}</div>
+                    {entry.round_type_english && (
+                      <div className="px-2 py-0.5 rounded bg-[#0078d4]/20 text-xs text-[#0078d4]">
+                        {entry.round_type_english}
+                      </div>
+                    )}
+                    {entry.round_type && !entry.round_type_english && (
+                      <div className="text-xs text-gray-500">
+                        {entry.round_type} 生存
+                      </div>
+                    )}
+                  </div>
+                  {entry.terror_names && entry.terror_names.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {entry.terror_names.map((name, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 rounded bg-red-500/20 text-xs text-red-400"
+                        >
+                          {name}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
