@@ -18,7 +18,7 @@ use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Emitter, Manager, WindowEvent};
 use tauri_plugin_autostart::MacosLauncher;
 
-use terror_data::{get_moon_terror_index, get_terror_data, round_type_to_english, TerrorData};
+use terror_data::{get_moon_terror_index, get_terror_data, get_terrors_data, round_type_to_english, TerrorData};
 
 const WORLD_ID: &str = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd";
 const MAX_HISTORY: usize = 10;
@@ -306,10 +306,9 @@ fn set_vr_overlay_enabled(
             // 現在のラウンド情報があれば送信
             if current_round.is_active && !current_round.killers.is_empty() {
                 let round_type = current_round.round_type.as_deref().unwrap_or("Classic");
-                let terror_infos: Vec<VrTerrorInfo> = current_round
-                    .killers
-                    .iter()
-                    .map(|id| get_terror_data(*id, round_type).into())
+                let terror_infos: Vec<VrTerrorInfo> = get_terrors_data(&current_round.killers, round_type)
+                    .into_iter()
+                    .map(|d| d.into())
                     .collect();
                 send_vr_command(
                     vr_state.inner(),
@@ -375,9 +374,9 @@ fn get_terror_info(id: u32, round_type: String) -> TerrorDataResponse {
 
 #[tauri::command]
 fn get_terrors_info(killer_ids: Vec<u32>, round_type: String) -> Vec<TerrorDataResponse> {
-    killer_ids
-        .iter()
-        .map(|id| get_terror_data(*id, &round_type).into())
+    get_terrors_data(&killer_ids, &round_type)
+        .into_iter()
+        .map(|d| d.into())
         .collect()
 }
 
@@ -1018,11 +1017,9 @@ fn process_log_line(line: &str, patterns: &LogPatterns, state: &mut AppState) ->
             let (terror_names, round_type_english) = if state.current_round.is_active {
                 let rt = round_type.as_deref().unwrap_or("Classic");
                 // キラーIDからテラー名を取得
-                let names: Vec<String> = state
-                    .current_round
-                    .killers
-                    .iter()
-                    .map(|id| get_terror_data(*id, rt).name)
+                let names: Vec<String> = get_terrors_data(&state.current_round.killers, rt)
+                    .into_iter()
+                    .map(|d| d.name)
                     .collect();
                 let terror_names = if names.is_empty() { None } else { Some(names) };
                 // ラウンドタイプを英語に変換
@@ -1121,10 +1118,9 @@ fn start_steamvr_monitor(app_handle: AppHandle, state: SharedState, vr_state: Sh
                         if current_round.is_active && !current_round.killers.is_empty() {
                             let round_type =
                                 current_round.round_type.as_deref().unwrap_or("Classic");
-                            let terror_infos: Vec<VrTerrorInfo> = current_round
-                                .killers
-                                .iter()
-                                .map(|id| get_terror_data(*id, round_type).into())
+                            let terror_infos: Vec<VrTerrorInfo> = get_terrors_data(&current_round.killers, round_type)
+                                .into_iter()
+                                .map(|d| d.into())
                                 .collect();
                             let _ = send_vr_command(
                                 &vr_state,
@@ -1251,9 +1247,9 @@ fn start_log_monitor(app_handle: AppHandle, state: SharedState, vr_state: Shared
                                     // VRオーバーレイに敵情報を送信
                                     if vr_enabled {
                                         if killers_changed && !killers.is_empty() {
-                                            let terror_infos: Vec<VrTerrorInfo> = killers
-                                                .iter()
-                                                .map(|id| get_terror_data(*id, &round_type).into())
+                                            let terror_infos: Vec<VrTerrorInfo> = get_terrors_data(&killers, &round_type)
+                                                .into_iter()
+                                                .map(|d| d.into())
                                                 .collect();
                                             let _ = send_vr_command(
                                                 &vr_state,
