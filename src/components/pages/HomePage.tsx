@@ -5,7 +5,6 @@ import {
   Skull,
   Target,
   Swords,
-  RotateCcw,
   ChevronDown,
 } from "lucide-react";
 import { SectionHeader, Card } from "../common";
