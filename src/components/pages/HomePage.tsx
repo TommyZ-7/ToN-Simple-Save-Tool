@@ -6,8 +6,9 @@ import {
   Target,
   Swords,
   RotateCcw,
+  ChevronDown,
 } from "lucide-react";
-import { SectionHeader, Card, Toggle } from "../common";
+import { SectionHeader, Card } from "../common";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,8 +36,6 @@ interface HomePageProps {
   stats: RoundStats;
   survivals: number;
   instanceRoundCounts: Record<string, number>;
-  showInstanceCounter: boolean;
-  onToggleInstanceCounter: () => void;
 }
 
 // ラウンドタイプの表示名（キーはログから取得される日本語名）
@@ -84,10 +83,9 @@ export function HomePage({
   stats,
   survivals,
   instanceRoundCounts,
-  showInstanceCounter,
-  onToggleInstanceCounter,
 }: HomePageProps) {
   const [copied, setCopied] = useState(false);
+  const [instanceCounterOpen, setInstanceCounterOpen] = useState(false);
 
   const handleCopy = async () => {
     if (latestCode?.code) {
@@ -203,27 +201,32 @@ export function HomePage({
       </div>
 
       {/* インスタンス内ラウンドタイプカウンター */}
-      <Card hover={false} className="p-4">
-        <div className="flex items-center justify-between mb-3">
+      <Card hover={false} className="p-0 overflow-hidden">
+        <button
+          onClick={() => setInstanceCounterOpen((prev) => !prev)}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer"
+        >
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-white">
                 インスタンス内カウンター
               </span>
             </div>
-            {showInstanceCounter && instanceTotal > 0 && (
+            {instanceTotal > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-[#0078d4]/20 text-xs text-[#0078d4] font-medium">
                 計 {instanceTotal} ラウンド
               </span>
             )}
           </div>
-          <Toggle
-            checked={showInstanceCounter}
-            onChange={onToggleInstanceCounter}
-          />
-        </div>
-        <AnimatePresence>
-          {showInstanceCounter && (
+          <motion.div
+            animate={{ rotate: instanceCounterOpen ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          >
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          </motion.div>
+        </button>
+        <AnimatePresence initial={false}>
+          {instanceCounterOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -231,31 +234,33 @@ export function HomePage({
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              {activeInstanceTypes.length > 0 ? (
-                <div className="grid grid-cols-4 gap-3">
-                  {activeInstanceTypes.map((type) => (
-                    <motion.div
-                      key={type}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400 truncate">
-                          {ROUND_TYPE_LABELS[type] || type}
-                        </span>
-                        <span className="text-sm font-medium text-[#0078d4]">
-                          {instanceRoundCounts[type]}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500 text-sm">
-                  まだラウンドがありません
-                </div>
-              )}
+              <div className="px-4 pb-4">
+                {activeInstanceTypes.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-3">
+                    {activeInstanceTypes.map((type) => (
+                      <motion.div
+                        key={type}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400 truncate">
+                            {ROUND_TYPE_LABELS[type] || type}
+                          </span>
+                          <span className="text-sm font-medium text-[#0078d4]">
+                            {instanceRoundCounts[type]}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    まだラウンドがありません
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

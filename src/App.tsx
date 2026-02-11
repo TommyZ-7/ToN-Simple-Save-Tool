@@ -57,7 +57,6 @@ type AppSnapshot = {
   survivals: number;
   current_round: CurrentRoundInfo;
   instance_round_counts: Record<string, number>;
-  show_instance_counter: boolean;
 };
 
 function App() {
@@ -74,7 +73,6 @@ function App() {
       is_dead: false,
     },
     instance_round_counts: {},
-    show_instance_counter: false,
   });
   const [autoStartEnabled, setAutoStartEnabled] = useState(false);
   const previousPageRef = useRef<string>("home");
@@ -179,14 +177,6 @@ function App() {
     setSnapshot((prev) => ({ ...prev, settings: data }));
   };
 
-  const toggleInstanceCounter = async () => {
-    const newValue = !snapshot.show_instance_counter;
-    const data = (await invoke("set_show_instance_counter", {
-      enabled: newValue,
-    })) as AppSnapshot;
-    setSnapshot(data);
-  };
-
   const setVrOverlayPosition = async (
     position: "RightHand" | "LeftHand" | "Above",
   ) => {
@@ -209,8 +199,6 @@ function App() {
             stats={snapshot.stats}
             survivals={snapshot.survivals}
             instanceRoundCounts={snapshot.instance_round_counts}
-            showInstanceCounter={snapshot.show_instance_counter}
-            onToggleInstanceCounter={toggleInstanceCounter}
           />
         );
       case "realtime":

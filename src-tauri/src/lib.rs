@@ -149,7 +149,6 @@ struct AppSnapshot {
     survivals: u32,
     current_round: CurrentRoundInfo,
     instance_round_counts: HashMap<String, u32>,
-    show_instance_counter: bool,
 }
 
 /// ランタイム状態（メモリ上のみ）
@@ -164,8 +163,6 @@ struct AppState {
     last_copied_code: Option<String>,
     /// インスタンス内ラウンドタイプ別カウンター（メモリのみ、永続化しない）
     instance_round_counts: HashMap<String, u32>,
-    /// インスタンスカウンター表示フラグ（メモリのみ、永続化しない）
-    show_instance_counter: bool,
 }
 
 /// VRオーバーレイプロセス状態
@@ -256,7 +253,6 @@ fn get_state(state: tauri::State<SharedState>) -> AppSnapshot {
         survivals: state.data.stats.survivals,
         current_round: state.current_round.clone(),
         instance_round_counts: state.instance_round_counts.clone(),
-        show_instance_counter: state.show_instance_counter,
     }
 }
 
@@ -370,27 +366,6 @@ fn set_vr_overlay_position(
     }
 
     Ok(updated_settings)
-}
-
-// ============ インスタンスカウンターコマンド ============
-
-#[tauri::command]
-fn set_show_instance_counter(
-    state: tauri::State<SharedState>,
-    enabled: bool,
-) -> Result<AppSnapshot, String> {
-    let mut state = state.lock().map_err(|_| "state lock failed")?;
-    state.show_instance_counter = enabled;
-    Ok(AppSnapshot {
-        settings: state.settings.clone(),
-        history: state.data.history.clone(),
-        latest_code: state.data.history.last().cloned(),
-        stats: state.data.stats.clone(),
-        survivals: state.data.stats.survivals,
-        current_round: state.current_round.clone(),
-        instance_round_counts: state.instance_round_counts.clone(),
-        show_instance_counter: state.show_instance_counter,
-    })
 }
 
 // ============ テラーデータコマンド ============
@@ -1270,7 +1245,6 @@ fn start_log_monitor(app_handle: AppHandle, state: SharedState, vr_state: Shared
                                         survivals: state_guard.data.stats.survivals,
                                         current_round: state_guard.current_round.clone(),
                                         instance_round_counts: state_guard.instance_round_counts.clone(),
-                                        show_instance_counter: state_guard.show_instance_counter,
                                     };
                                     let auto_switch = state_guard.settings.auto_switch_tab;
                                     let vr_enabled = state_guard.settings.vr_overlay_enabled;
@@ -1443,7 +1417,6 @@ pub fn run() {
             set_auto_switch_tab,
             set_vr_overlay_enabled,
             set_vr_overlay_position,
-            set_show_instance_counter,
             get_terror_info,
             get_terrors_info,
         ])
