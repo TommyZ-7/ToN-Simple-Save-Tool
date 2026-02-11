@@ -207,7 +207,6 @@ export function HomePage({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-[#0078d4]" />
               <span className="text-sm font-medium text-white">
                 インスタンス内カウンター
               </span>

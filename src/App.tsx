@@ -254,17 +254,7 @@ function App() {
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-center gap-2 text-amber-500 text-sm font-medium shrink-0">
-            <AlertTriangle className="w-4 h-4" />
-            <span>
-              開発中: 敵判別機能は調整中のため、うまくできない場合があります。
-            </span>
-          </div>
-          <PageContainer currentPage={currentPage}>
-            {renderPage()}
-          </PageContainer>
-        </div>
+        <PageContainer currentPage={currentPage}>{renderPage()}</PageContainer>
       </div>
 
       {/* アップデート通知バナー */}
