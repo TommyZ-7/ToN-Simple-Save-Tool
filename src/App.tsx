@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { AlertTriangle } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -55,6 +56,8 @@ type AppSnapshot = {
   stats: RoundStats;
   survivals: number;
   current_round: CurrentRoundInfo;
+  instance_round_counts: Record<string, number>;
+  show_instance_counter: boolean;
 };
 
 function App() {
@@ -70,6 +73,8 @@ function App() {
       killers: [],
       is_dead: false,
     },
+    instance_round_counts: {},
+    show_instance_counter: false,
   });
   const [autoStartEnabled, setAutoStartEnabled] = useState(false);
   const previousPageRef = useRef<string>("home");
@@ -174,7 +179,17 @@ function App() {
     setSnapshot((prev) => ({ ...prev, settings: data }));
   };
 
-  const setVrOverlayPosition = async (position: "RightHand" | "LeftHand" | "Above") => {
+  const toggleInstanceCounter = async () => {
+    const newValue = !snapshot.show_instance_counter;
+    const data = (await invoke("set_show_instance_counter", {
+      enabled: newValue,
+    })) as AppSnapshot;
+    setSnapshot(data);
+  };
+
+  const setVrOverlayPosition = async (
+    position: "RightHand" | "LeftHand" | "Above",
+  ) => {
     const data = (await invoke("set_vr_overlay_position", {
       position: position,
     })) as AppSettings;
@@ -193,6 +208,9 @@ function App() {
             latestCode={snapshot.latest_code}
             stats={snapshot.stats}
             survivals={snapshot.survivals}
+            instanceRoundCounts={snapshot.instance_round_counts}
+            showInstanceCounter={snapshot.show_instance_counter}
+            onToggleInstanceCounter={toggleInstanceCounter}
           />
         );
       case "realtime":
@@ -206,7 +224,9 @@ function App() {
             autoSwitchTabEnabled={snapshot.settings.auto_switch_tab ?? false}
             logDir={snapshot.settings.log_dir}
             vrOverlayEnabled={snapshot.settings.vr_overlay_enabled ?? false}
-            vrOverlayPosition={snapshot.settings.vr_overlay_position ?? "RightHand"}
+            vrOverlayPosition={
+              snapshot.settings.vr_overlay_position ?? "RightHand"
+            }
             onToggleAutoStart={toggleAutoStart}
             onToggleAutoSwitchTab={toggleAutoSwitchTab}
             onChooseLogDir={handleChooseLogDir}
@@ -234,7 +254,17 @@ function App() {
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-        <PageContainer currentPage={currentPage}>{renderPage()}</PageContainer>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-center gap-2 text-amber-500 text-sm font-medium shrink-0">
+            <AlertTriangle className="w-4 h-4" />
+            <span>
+              開発中: 敵判別機能は調整中のため、うまくできない場合があります。
+            </span>
+          </div>
+          <PageContainer currentPage={currentPage}>
+            {renderPage()}
+          </PageContainer>
+        </div>
       </div>
 
       {/* アップデート通知バナー */}

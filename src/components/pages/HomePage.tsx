@@ -5,8 +5,9 @@ import {
   Skull,
   Target,
   Swords,
+  RotateCcw,
 } from "lucide-react";
-import { SectionHeader, Card } from "../common";
+import { SectionHeader, Card, Toggle } from "../common";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -33,6 +34,9 @@ interface HomePageProps {
   latestCode: CodeEntry | null | undefined;
   stats: RoundStats;
   survivals: number;
+  instanceRoundCounts: Record<string, number>;
+  showInstanceCounter: boolean;
+  onToggleInstanceCounter: () => void;
 }
 
 // ラウンドタイプの表示名（キーはログから取得される日本語名）
@@ -75,7 +79,14 @@ const ROUND_TYPE_ORDER = [
   "ゴースト",
 ];
 
-export function HomePage({ latestCode, stats, survivals }: HomePageProps) {
+export function HomePage({
+  latestCode,
+  stats,
+  survivals,
+  instanceRoundCounts,
+  showInstanceCounter,
+  onToggleInstanceCounter,
+}: HomePageProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -89,6 +100,14 @@ export function HomePage({ latestCode, stats, survivals }: HomePageProps) {
   const totalRounds = survivals + stats.deaths;
   const survivalRate =
     totalRounds > 0 ? Math.round((survivals / totalRounds) * 100) : 0;
+
+  const instanceTotal = Object.values(instanceRoundCounts).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  const activeInstanceTypes = ROUND_TYPE_ORDER.filter(
+    (type) => (instanceRoundCounts[type] ?? 0) > 0,
+  );
 
   return (
     <div className="space-y-6">
@@ -116,18 +135,19 @@ export function HomePage({ latestCode, stats, survivals }: HomePageProps) {
                     </div>
                   )}
                 </div>
-                {latestCode.terror_names && latestCode.terror_names.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {latestCode.terror_names.map((name, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded bg-red-500/20 text-xs text-red-400"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                {latestCode.terror_names &&
+                  latestCode.terror_names.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {latestCode.terror_names.map((name, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 rounded bg-red-500/20 text-xs text-red-400"
+                        >
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
               </div>
             ) : (
               <div className="text-sm text-gray-500">コードがありません</div>
@@ -181,6 +201,66 @@ export function HomePage({ latestCode, stats, survivals }: HomePageProps) {
           color="#f59e0b"
         />
       </div>
+
+      {/* インスタンス内ラウンドタイプカウンター */}
+      <Card hover={false} className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-[#0078d4]" />
+              <span className="text-sm font-medium text-white">
+                インスタンス内カウンター
+              </span>
+            </div>
+            {showInstanceCounter && instanceTotal > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-[#0078d4]/20 text-xs text-[#0078d4] font-medium">
+                計 {instanceTotal} ラウンド
+              </span>
+            )}
+          </div>
+          <Toggle
+            checked={showInstanceCounter}
+            onChange={onToggleInstanceCounter}
+          />
+        </div>
+        <AnimatePresence>
+          {showInstanceCounter && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              {activeInstanceTypes.length > 0 ? (
+                <div className="grid grid-cols-4 gap-3">
+                  {activeInstanceTypes.map((type) => (
+                    <motion.div
+                      key={type}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400 truncate">
+                          {ROUND_TYPE_LABELS[type] || type}
+                        </span>
+                        <span className="text-sm font-medium text-[#0078d4]">
+                          {instanceRoundCounts[type]}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  まだラウンドがありません
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
 
       {/* ラウンドタイプ別統計 */}
       <Card hover={false} className="p-4">

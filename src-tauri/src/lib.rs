@@ -148,6 +148,8 @@ struct AppSnapshot {
     stats: RoundStats,
     survivals: u32,
     current_round: CurrentRoundInfo,
+    instance_round_counts: HashMap<String, u32>,
+    show_instance_counter: bool,
 }
 
 /// ランタイム状態（メモリ上のみ）
@@ -160,6 +162,10 @@ struct AppState {
     last_log_path: Option<PathBuf>,
     last_offset: u64,
     last_copied_code: Option<String>,
+    /// インスタンス内ラウンドタイプ別カウンター（メモリのみ、永続化しない）
+    instance_round_counts: HashMap<String, u32>,
+    /// インスタンスカウンター表示フラグ（メモリのみ、永続化しない）
+    show_instance_counter: bool,
 }
 
 /// VRオーバーレイプロセス状態
@@ -249,6 +255,8 @@ fn get_state(state: tauri::State<SharedState>) -> AppSnapshot {
         stats: state.data.stats.clone(),
         survivals: state.data.stats.survivals,
         current_round: state.current_round.clone(),
+        instance_round_counts: state.instance_round_counts.clone(),
+        show_instance_counter: state.show_instance_counter,
     }
 }
 
@@ -362,6 +370,27 @@ fn set_vr_overlay_position(
     }
 
     Ok(updated_settings)
+}
+
+// ============ インスタンスカウンターコマンド ============
+
+#[tauri::command]
+fn set_show_instance_counter(
+    state: tauri::State<SharedState>,
+    enabled: bool,
+) -> Result<AppSnapshot, String> {
+    let mut state = state.lock().map_err(|_| "state lock failed")?;
+    state.show_instance_counter = enabled;
+    Ok(AppSnapshot {
+        settings: state.settings.clone(),
+        history: state.data.history.clone(),
+        latest_code: state.data.history.last().cloned(),
+        stats: state.data.stats.clone(),
+        survivals: state.data.stats.survivals,
+        current_round: state.current_round.clone(),
+        instance_round_counts: state.instance_round_counts.clone(),
+        show_instance_counter: state.show_instance_counter,
+    })
 }
 
 // ============ テラーデータコマンド ============
@@ -946,6 +975,11 @@ fn process_log_line(line: &str, patterns: &LogPatterns, state: &mut AppState) ->
 
     // ワールド移動を検出（ラウンドを無効化）
     if patterns.left_room_re.is_match(line) {
+        // Joining wrld_ の場合はインスタンスカウンターをリセット
+        if line.contains("Joining wrld_") {
+            println!("[tsst] インスタンス変更検出（カウンターリセット）");
+            state.instance_round_counts.clear();
+        }
         if state.current_round.is_active {
             println!("[tsst] ワールド移動検出（ラウンド無効化）");
             // ラウンドをリセット（統計に含めない）
@@ -992,6 +1026,14 @@ fn process_log_line(line: &str, patterns: &LogPatterns, state: &mut AppState) ->
                 round_type, state.data.stats.survivals, state.data.stats.deaths
             );
         }
+
+        // インスタンス内ラウンドタイプカウンターを更新
+        *state.instance_round_counts.entry(round_type.clone()).or_insert(0) += 1;
+        println!(
+            "[tsst] インスタンスカウンター更新: {} = {}",
+            round_type,
+            state.instance_round_counts.get(&round_type).unwrap_or(&0)
+        );
 
         // ラウンド情報をリセット
         state.current_round = CurrentRoundInfo::default();
@@ -1227,6 +1269,8 @@ fn start_log_monitor(app_handle: AppHandle, state: SharedState, vr_state: Shared
                                         stats: state_guard.data.stats.clone(),
                                         survivals: state_guard.data.stats.survivals,
                                         current_round: state_guard.current_round.clone(),
+                                        instance_round_counts: state_guard.instance_round_counts.clone(),
+                                        show_instance_counter: state_guard.show_instance_counter,
                                     };
                                     let auto_switch = state_guard.settings.auto_switch_tab;
                                     let vr_enabled = state_guard.settings.vr_overlay_enabled;
@@ -1399,6 +1443,7 @@ pub fn run() {
             set_auto_switch_tab,
             set_vr_overlay_enabled,
             set_vr_overlay_position,
+            set_show_instance_counter,
             get_terror_info,
             get_terrors_info,
         ])
